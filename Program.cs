@@ -1,67 +1,54 @@
-using System;
-using System.Diagnostics;
-using System.Drawing;
-
 namespace TelCo.ColorCoder
 {
-    class Program
+    internal class ColorPair
     {
-        private static Color[] colorMapMajor;
-        private static Color[] colorMapMinor;
+        internal Color MajorColor { get; set; }
+        internal Color MinorColor { get; set; }
 
-        internal class ColorPair
+        public override string ToString()
         {
-            internal Color majorColor;
-            internal Color minorColor;
-
-            public override string ToString()
-            {
-                return $"MajorColor:{majorColor.Name}, MinorColor:{minorColor.Name}";
-            }
+            return $"MajorColor: {MajorColor.Name}, MinorColor: {MinorColor.Name}";
         }
+    }
 
-        static Program()
+    internal static class ColorMapper
+    {
+        private static readonly Color[] ColorMapMajor = { Color.White, Color.Red, Color.Black, Color.Yellow, Color.Violet };
+        private static readonly Color[] ColorMapMinor = { Color.Blue, Color.Orange, Color.Green, Color.Brown, Color.SlateGray };
+
+        public static ColorPair GetColorFromPairNumber(int pairNumber)
         {
-            colorMapMajor = new Color[] { Color.White, Color.Red, Color.Black, Color.Yellow, Color.Violet };
-            colorMapMinor = new Color[] { Color.Blue, Color.Orange, Color.Green, Color.Brown, Color.SlateGray };
-        }
+            ValidatePairNumber(pairNumber);
 
-        private static ColorPair GetColorFromPairNumber(int pairNumber)
-        {
-            int minorSize = colorMapMinor.Length;
-            int majorSize = colorMapMajor.Length;
-            ValidatePairNumber(pairNumber, majorSize, minorSize);
+            int minorSize = ColorMapMinor.Length;
+            int majorIndex = (pairNumber - 1) / minorSize;
+            int minorIndex = (pairNumber - 1) % minorSize;
 
-            int zeroBasedPairNumber = pairNumber - 1;
             return new ColorPair
             {
-                majorColor = colorMapMajor[zeroBasedPairNumber / minorSize],
-                minorColor = colorMapMinor[zeroBasedPairNumber % minorSize]
+                MajorColor = ColorMapMajor[majorIndex],
+                MinorColor = ColorMapMinor[minorIndex]
             };
         }
 
-        private static int GetPairNumberFromColor(ColorPair pair)
+        public static int GetPairNumberFromColor(ColorPair pair)
         {
-            int majorIndex = GetColorIndex(pair.majorColor, colorMapMajor);
-            int minorIndex = GetColorIndex(pair.minorColor, colorMapMinor);
+            int majorIndex = Array.IndexOf(ColorMapMajor, pair.MajorColor);
+            int minorIndex = Array.IndexOf(ColorMapMinor, pair.MinorColor);
 
-            return (majorIndex * colorMapMinor.Length) + (minorIndex + 1);
+            if (majorIndex == -1 || minorIndex == -1)
+                throw new ArgumentException($"Unknown Colors: {pair}");
+
+            return (majorIndex * ColorMapMinor.Length) + (minorIndex + 1);
         }
 
-        private static void ValidatePairNumber(int pairNumber, int majorSize, int minorSize)
+        private static void ValidatePairNumber(int pairNumber)
         {
-            if (pairNumber < 1 || pairNumber > majorSize * minorSize)
-                throw new ArgumentOutOfRangeException($"PairNumber:{pairNumber} is outside the allowed range");
-        }
-
-        private static int GetColorIndex(Color color, Color[] colorMap)
-        {
-            for (int i = 0; i < colorMap.Length; i++)
+            int totalPairs = ColorMapMajor.Length * ColorMapMinor.Length;
+            if (pairNumber < 1 || pairNumber > totalPairs)
             {
-                if (colorMap[i] == color)
-                    return i;
+                throw new ArgumentOutOfRangeException($"Pair number {pairNumber} is out of range.");
             }
-            throw new ArgumentException($"Unknown Color: {color.Name}");
         }
     }
 }
