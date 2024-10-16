@@ -27,6 +27,7 @@ namespace CableColorMapping
             {
                 return PrimaryColor.Equals(otherPair.PrimaryColor) && SecondaryColor.Equals(otherPair.SecondaryColor);
             }
+            
             return false;
         }
 
