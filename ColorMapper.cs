@@ -62,6 +62,7 @@ namespace CableColorMapping
             {
                 throw new ArgumentException("Color pair is not recognized.");
             }
+            
             return (primaryIndex * _secondaryColorCount) + (secondaryIndex + 1);
         }
     }
